@@ -1,4 +1,5 @@
 const { mount } = redom;
+import { layout } from './layout.js';
 import { app } from './app.js';
 
 page('/grocery', () => app.update('list-grocery'));
@@ -12,5 +13,5 @@ page({
   hashbang: true,
 });
 
-mount(document.body, app);
+mount(document.body, layout);
 
