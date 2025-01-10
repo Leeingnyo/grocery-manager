@@ -7,6 +7,13 @@
 <body>
   <!-- scripts -->
   <script src="./vendor/tailwind/3.4.16.js"></script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .btn {
+        @apply px-2 py-1 border rounded text-slate-700 border-slate-700 hover:bg-slate-500/50 hover:text-white
+      }
+    }
+  </style>
   <script src="./vendor/page/page.min.js"></script>
   <script src="./vendor/redom/redom.min.js"></script>
   <script src="./vendor/rxjs/rxjs.umd.min.js"></script>
