@@ -3,7 +3,7 @@ const { fromEvent, switchMap, map } = rxjs;
 import { getUserInfo } from './google-drive-sync/google-api.js';
 
 import { app } from './app.js';
-import { googleDriveSync } from './google-drive-sync-instance.js';
+import { googleDriveSyncInstance } from './google-drive-sync-instance.js';
 
 class Layout {
   #syncButton;
@@ -37,10 +37,10 @@ class Layout {
     });
 
     fromEvent(this.#authorizeButton._el, 'click').subscribe((e) => {
-      googleDriveSync.login();
+      googleDriveSyncInstance.login();
     });
     fromEvent(this.#signOutButton._el, 'click').subscribe((e) => {
-      googleDriveSync.logout();
+      googleDriveSyncInstance.logout();
     });
 
     this.#authorizeButton.update(true);

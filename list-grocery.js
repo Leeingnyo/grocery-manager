@@ -1,4 +1,5 @@
 const { el, list } = redom;
+import { stateEmitter$ } from './state.js';
 
 class Item {
   #name;
@@ -10,7 +11,7 @@ class Item {
   }
 
   update({ name }) {
-    this.#name.textContext = name;
+    this.#name.textContent = name;
   }
 }
 
@@ -25,17 +26,11 @@ class LargeSection {
     );
   }
 
-  update({ id, name = '' } = {}, _index, _items, context) {
+  update({ id, name = '' } = {}, _index, _items, { itemMap } = {}) {
     this.#name.textContent = name;
-    this.#items.update(context?.[id] ?? []);
+    this.#items.update(itemMap?.[id] ?? []);
   }
 }
-
-const largeSections = [
-  { id: 0, name: '냉장고' },
-  { id: 1, name: '냉동고' },
-  { id: 2, name: '실온' },
-];
 
 export class ListGrocery {
   #largeSection;
@@ -55,7 +50,9 @@ export class ListGrocery {
       page('/add-grocery');
     });
 
-    this.#largeSection.update(largeSections, {});
+    stateEmitter$.subscribe((state) => {
+      this.#largeSection.update(state.largeSections, state);
+    });
   }
 }
 

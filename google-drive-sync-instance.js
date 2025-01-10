@@ -2,7 +2,7 @@ import {
   GoogleDriveSync,
 } from './google-drive-sync/google-drive-sync.js';
 
-export const googleDriveSync = new GoogleDriveSync({
+export const googleDriveSyncInstance = new GoogleDriveSync({
   useOffline: true,
   saveRefreshToken: true,
   usePrivate: false,
@@ -10,6 +10,4 @@ export const googleDriveSync = new GoogleDriveSync({
   autoSync: false,
   ignoreConflict: true,
 });
-
-googleDriveSync.initGoogleLibrary();
 
