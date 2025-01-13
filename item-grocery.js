@@ -1,27 +1,42 @@
 const { produce } = immer;
-const { el, router } = redom;
+const { el, router, place } = redom;
 const { fromEvent, map, combineLatestWith } = rxjs;
 import { store, stateEmitter$, APP_STATE_KEY } from './state.js';
 
 class NumberInput {
   #minus;
+  #unit2;
   #number;
+  #unit;
   #plus;
 
   constructor() {
     this.el = el('.flex.items-center',
       this.#minus = el('button.btn', '-'),
-      this.#number = el('input.mx-2.w-12.text-center', { type: 'number' }),
+      this.#unit2 = el('span.ml-1.invisible'),
+      this.#number = el('input.w-10.text-center'),
+      this.#unit = el('span.mr-1'),
       this.#plus = el('button.btn', '+'),
     );
 
     this.minus$ = fromEvent(this.#minus, 'click').pipe(map((e) => -1));
-    this.number$ = fromEvent(this.#number, 'input').pipe(map((e) => +e.currentTarget.value));
+    this.number$ = fromEvent(this.#number, 'input').pipe(map((e) => {
+      console.log(
+        e.currentTarget.value, (+e.currentTarget.value).toString(),
+        e.currentTarget.value === (+e.currentTarget.value).toString()
+      );
+      return (
+        e.currentTarget.value === (+e.currentTarget.value).toString() ?
+          e.currentTarget.value : undefined
+      );
+    }));
     this.plus$ = fromEvent(this.#plus, 'click').pipe(map((e) => 1));
   }
 
-  setNumber(number) {
+  setNumber(number, unit) {
     this.#number.value = number;
+    this.#unit2.textContent =
+    this.#unit.textContent = unit;
   }
 }
 
@@ -51,12 +66,12 @@ class AbundanceInput {
   constructor() {
     this.el = router('', {
       true:
-        el('.flex',
+        el('.flex.gap-2',
           this.#less = el('button', '부족'),
           el('button.font-bold', '많음'),
         ),
       false: 
-        el('.flex',
+        el('.flex.gap-2',
           el('button.font-bold', '부족'),
           this.#much = el('button', '많음'),
         ),
@@ -77,9 +92,9 @@ export class Item {
   #subscriptions;
 
   constructor() {
-    this.el = el('article.flex.items-center',
+    this.el = el('article.flex.gap-1.items-center.min-h-9',
       this.#name = el('span.grow'),
-      this.#router = router('', {
+      this.#router = router('.contents', {
         '수량': NumberInput,
         '퍼센트': PercentInput,
         '대충': AbundanceInput,
@@ -87,20 +102,38 @@ export class Item {
     );
   }
 
-  update({ name, kind, number, amount, abundance }, index, items, { id } = {}) {
+  update(
+    {
+      name,
+      kind,
+      number,
+      unit,
+      amount,
+      abundance,
+      productionDate,
+      expirationDate,
+    },
+    index,
+    items,
+    { id } = {}
+  ) {
     if (this.#subscriptions?.length) {
       this.#subscriptions.forEach((subscription) => subscription.unsubscribe());
     }
     this.#name.textContent = name;
+    this.#time.update({ productionDate, expirationDate });
     this.#router.update(kind);
     if (kind === '수량') {
-      this.#router.view.setNumber(number);
+      this.#router.view.setNumber(number, unit);
       const minusSubscription = this.#router.view.minus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].number -= 1;
         }));
       });
       const numberSubscription = this.#router.view.number$.pipe(combineLatestWith(stateEmitter$)).subscribe(([number, state]) => {
+        if (number === undefined) {
+          return;
+        }
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].number = number;
         }));
