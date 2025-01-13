@@ -17,7 +17,7 @@ class Layout {
     this.el = el('section',
       el('header.p-2.sticky.top-0.bg-slate-500/50.backdrop-blur',
         el('div.flex.items-center',
-          el('h1.text-3xl.grow.text-slate-900', 'Home Grocery Manager'),
+          el('h1.text-3xl.grow.text-slate-900', '식료품 관리'),
           this.#syncButton = el('button.btn', 'Sync'),
         ),
         this.#nav = place(el('nav.mt-2.flex.flex-row-reverse.items-center',
