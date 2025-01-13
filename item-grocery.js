@@ -108,6 +108,7 @@ export class Item {
       kind,
       number,
       unit,
+      step = 1,
       amount,
       abundance,
       productionDate,
@@ -127,7 +128,7 @@ export class Item {
       this.#router.view.setNumber(number, unit);
       const minusSubscription = this.#router.view.minus$.pipe(withLatestFrom(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
-          draft.itemMap[id][index].number -= 1;
+          draft.itemMap[id][index].number -= 1 * step;
         }));
       });
       const numberSubscription = this.#router.view.number$.pipe(withLatestFrom(stateEmitter$)).subscribe(([number, state]) => {
@@ -140,7 +141,7 @@ export class Item {
       });
       const plusSubscription = this.#router.view.plus$.pipe(withLatestFrom(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
-          draft.itemMap[id][index].number += 1;
+          draft.itemMap[id][index].number += 1 * step;
         }));
       });
       this.#subscriptions = [minusSubscription, numberSubscription, plusSubscription];
