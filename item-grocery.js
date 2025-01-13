@@ -11,16 +11,17 @@ class NumberInput {
   constructor() {
     this.el = el('.flex.items-center',
       this.#minus = el('button.btn', '-'),
-      this.#number = el('span.mx-2', ''),
+      this.#number = el('input.mx-2.w-12.text-center', { type: 'number' }),
       this.#plus = el('button.btn', '+'),
     );
 
     this.minus$ = fromEvent(this.#minus, 'click').pipe(map((e) => -1));
+    this.number$ = fromEvent(this.#number, 'input').pipe(map((e) => +e.currentTarget.value));
     this.plus$ = fromEvent(this.#plus, 'click').pipe(map((e) => 1));
   }
 
   setNumber(number) {
-    this.#number.textContent = number;
+    this.#number.value = number;
   }
 }
 
@@ -31,7 +32,7 @@ class PercentInput {
   constructor() {
     this.el = el('.flex.items-center',
       this.#percent = el('input', { type: 'range', min: 0, max: 100, value: 0 }),
-      this.#percentValue = el('span.ml-1'),
+      this.#percentValue = el('span.ml-1.min-w-11.text-right'),
     );
 
     this.percent$ = fromEvent(this.#percent, 'input').pipe(map((e) => +e.currentTarget.value));
@@ -94,17 +95,22 @@ export class Item {
     this.#router.update(kind);
     if (kind === '수량') {
       this.#router.view.setNumber(number);
-      const minusSubscription = this.#router.view.minus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([e, state]) => {
+      const minusSubscription = this.#router.view.minus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].number -= 1;
         }));
       });
-      const plusSubscription = this.#router.view.plus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([e, state]) => {
+      const numberSubscription = this.#router.view.number$.pipe(combineLatestWith(stateEmitter$)).subscribe(([number, state]) => {
+        store.save(APP_STATE_KEY, produce(state, (draft) => {
+          draft.itemMap[id][index].number = number;
+        }));
+      });
+      const plusSubscription = this.#router.view.plus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].number += 1;
         }));
       });
-      this.#subscriptions = [minusSubscription, plusSubscription];
+      this.#subscriptions = [minusSubscription, numberSubscription, plusSubscription];
     } else if (kind === '퍼센트') {
       this.#router.view.setPercent(amount);
       const percentSubscription = this.#router.view.percent$.pipe(combineLatestWith(stateEmitter$)).subscribe(([amount, state]) => {
