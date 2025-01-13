@@ -1,19 +1,7 @@
+const { produce } = immer;
 const { el, list } = redom;
 import { stateEmitter$ } from './state.js';
-
-class Item {
-  #name;
-
-  constructor() {
-    this.el = el('article',
-      this.#name = el('span'),
-    );
-  }
-
-  update({ name }) {
-    this.#name.textContent = name;
-  }
-}
+import { Item } from './item-grocery.js';
 
 class LargeSection {
   #name;
@@ -28,7 +16,7 @@ class LargeSection {
 
   update({ id, name = '' } = {}, _index, _items, { itemMap } = {}) {
     this.#name.textContent = name;
-    this.#items.update(itemMap?.[id] ?? []);
+    this.#items.update(itemMap?.[id] ?? [], { id });
   }
 }
 

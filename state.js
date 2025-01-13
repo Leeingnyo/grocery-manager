@@ -14,7 +14,7 @@ const INITIAL_STATE = {
 
 export const APP_STATE_KEY = 'grocery-manager.state';
 
-export const state = new Proxy(googleDriveSyncInstance, {
+export const store = new Proxy(googleDriveSyncInstance, {
   get(target, prop, receiver) {
     const value = Reflect.get(target, prop, receiver);
     if (value instanceof Function) {
@@ -22,9 +22,9 @@ export const state = new Proxy(googleDriveSyncInstance, {
         const result = value.apply(this === receiver ? target : this, args);
         if (prop === 'save' || prop === 'saveRemote') {
           const [key] = args;
-          if (key === INITIAL_STATE) {
+          if (key === APP_STATE_KEY) {
             const updatedValue = target['load'](key);
-            stateEmitter$.next({ key, value: updatedValue });
+            stateEmitter$.next(updatedValue);
           }
         }
         return result;
