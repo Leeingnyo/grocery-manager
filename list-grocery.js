@@ -10,7 +10,7 @@ class LargeSection {
   constructor() {
     this.el = el('section.my-2',
       this.#name = el('h2.text-2xl'),
-      this.#items = list('section', Item),
+      this.#items = list('section.divide-y', Item),
     );
   }
 
