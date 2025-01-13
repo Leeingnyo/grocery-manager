@@ -86,19 +86,49 @@ class AbundanceInput {
   }
 }
 
+export class Time {
+  #productionDate;
+  #infix;
+  #expirationDate;
+
+  constructor() {
+    this.el = el('',
+      this.#productionDate = el('time'),
+      this.#infix = place(el('span', ' ~ ')),
+      this.#expirationDate = el('time'),
+    );
+  }
+
+  update({ productionDate, expirationDate }) {
+    this.#productionDate.textContent = productionDate;
+    this.#productionDate.setAttribute('datetime', productionDate);
+
+    this.#infix.update(productionDate !== undefined || expirationDate !== undefined);
+
+    this.#expirationDate.textContent = expirationDate;
+    this.#expirationDate.setAttribute('datetime', expirationDate);
+  }
+}
+
 export class Item {
   #name;
+  #time;
   #router;
   #subscriptions;
 
   constructor() {
-    this.el = el('article.flex.gap-1.items-center.min-h-9',
-      this.#name = el('span.grow'),
-      this.#router = router('.contents', {
-        '수량': NumberInput,
-        '퍼센트': PercentInput,
-        '대충': AbundanceInput,
-      }),
+    this.el = el('article.min-h-9.pt-2.pb-1',
+      el('.flex.gap-1.items-center',
+        this.#name = el('span.grow'),
+        this.#router = router('.contents', {
+          '수량': NumberInput,
+          '퍼센트': PercentInput,
+          '대충': AbundanceInput,
+        }),
+      ),
+      el('.flex.gap-1.items-center.text-sm',
+        this.#time = new Time(),
+      ),
     );
   }
 
