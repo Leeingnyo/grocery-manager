@@ -1,4 +1,4 @@
-const { BehaviorSubject, filter, map } = rxjs;
+const { Subject, BehaviorSubject, filter, map } = rxjs;
 import { googleDriveSyncInstance } from './google-drive-sync-instance.js';
 
 const largeSections = [
@@ -25,6 +25,7 @@ export const store = new Proxy(googleDriveSyncInstance, {
           if (key === APP_STATE_KEY) {
             const updatedValue = target['load'](key);
             stateEmitter$.next(updatedValue);
+            saveEventEmitter$.next(new Date());
           }
         }
         return result;
@@ -35,4 +36,6 @@ export const store = new Proxy(googleDriveSyncInstance, {
 });
 
 export const stateEmitter$ = new BehaviorSubject(googleDriveSyncInstance.load(APP_STATE_KEY) ?? INITIAL_STATE);
+
+export const saveEventEmitter$ = new Subject();
 

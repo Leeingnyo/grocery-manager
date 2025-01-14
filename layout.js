@@ -1,9 +1,10 @@
 const { el, place } = redom;
-const { fromEvent, switchMap, map } = rxjs;
+const { fromEvent, switchMap, map, throttleTime, debounceTime } = rxjs;
 import { getUserInfo } from './google-drive-sync/google-api.js';
 
 import { app } from './app.js';
 import { googleDriveSyncInstance } from './google-drive-sync-instance.js';
+import { store, APP_STATE_KEY, stateEmitter$, saveEventEmitter$ } from './state.js';
 
 class Layout {
   #syncButton;
@@ -12,6 +13,11 @@ class Layout {
   #signOutButton;
   #username;
   #app;
+
+  #syncSubscripiton;
+  #logoutSubscription;
+  #loadInterval;
+  #saveSubscription;
 
   constructor(app) {
     this.el = el('section',
@@ -65,6 +71,40 @@ class Layout {
       .subscribe((username) => {
         this.#username.textContent = `User: ${username}`;
       });
+  }
+
+  onmount() {
+    this.#syncSubscripiton = fromEvent(window, 'SyncReady').subscribe((e) => {
+      const loadSyncedData = async () => {
+        const previous = this.#syncButton.textContent;
+        this.#syncButton.textContent = 'Syncing...';
+        const remoteState = await store.loadRemote(APP_STATE_KEY);
+        this.#syncButton.textContent = previous;
+        stateEmitter$.next(remoteState);
+      };
+      this.#loadInterval = setInterval(() => {
+        loadSyncedData();
+      }, 5 * 60 * 1000);
+      loadSyncedData();
+    });
+    this.#logoutSubscription = fromEvent(window, 'UserLogout').subscribe((e) => {
+      clearInterval(this.#loadInterval);
+    });
+
+    this.#saveSubscription = saveEventEmitter$.pipe(throttleTime(5000), debounceTime(5000)).subscribe(async (e) => {
+      console.log('try to sync data');
+      const previous = this.#syncButton.textContent;
+      this.#syncButton.textContent = 'Syncing...';
+      await googleDriveSyncInstance.syncRemote();
+      this.#syncButton.textContent = previous;
+    });
+  }
+
+  onunmount() {
+    this.#syncSubscripiton.unsubscribe();
+    clearInterval(this.#loadInterval);
+    this.#logoutSubscription.unsubscribe();
+    this.#saveSubscription.unsubscribe();
   }
 }
 
