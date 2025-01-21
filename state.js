@@ -10,6 +10,7 @@ const largeSections = [
 const INITIAL_STATE = {
   largeSections,
   itemMap: {},
+  templates: [],
 };
 
 export const APP_STATE_KEY = 'grocery-manager.state';
