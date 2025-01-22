@@ -1,6 +1,6 @@
 const { produce } = immer;
 const { el, router, place } = redom;
-const { fromEvent, map, combineLatestWith } = rxjs;
+const { fromEvent, map, withLatestFrom } = rxjs;
 import { store, stateEmitter$, APP_STATE_KEY } from './state.js';
 
 class NumberInput {
@@ -125,12 +125,12 @@ export class Item {
     this.#router.update(kind);
     if (kind === '수량') {
       this.#router.view.setNumber(number, unit);
-      const minusSubscription = this.#router.view.minus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([, state]) => {
+      const minusSubscription = this.#router.view.minus$.pipe(withLatestFrom(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].number -= 1;
         }));
       });
-      const numberSubscription = this.#router.view.number$.pipe(combineLatestWith(stateEmitter$)).subscribe(([number, state]) => {
+      const numberSubscription = this.#router.view.number$.pipe(withLatestFrom(stateEmitter$)).subscribe(([number, state]) => {
         if (number === undefined) {
           return;
         }
@@ -138,7 +138,7 @@ export class Item {
           draft.itemMap[id][index].number = number;
         }));
       });
-      const plusSubscription = this.#router.view.plus$.pipe(combineLatestWith(stateEmitter$)).subscribe(([, state]) => {
+      const plusSubscription = this.#router.view.plus$.pipe(withLatestFrom(stateEmitter$)).subscribe(([, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].number += 1;
         }));
@@ -146,7 +146,7 @@ export class Item {
       this.#subscriptions = [minusSubscription, numberSubscription, plusSubscription];
     } else if (kind === '퍼센트') {
       this.#router.view.setPercent(amount);
-      const percentSubscription = this.#router.view.percent$.pipe(combineLatestWith(stateEmitter$)).subscribe(([amount, state]) => {
+      const percentSubscription = this.#router.view.percent$.pipe(withLatestFrom(stateEmitter$)).subscribe(([amount, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].amount = amount;
         }));
@@ -154,12 +154,12 @@ export class Item {
       this.#subscriptions = [percentSubscription];
     } else if (kind === '대충') {
       this.#router.view.setAbundance(abundance);
-      const lessSubscription = this.#router.view.less$.pipe(combineLatestWith(stateEmitter$)).subscribe(([abundance, state]) => {
+      const lessSubscription = this.#router.view.less$.pipe(withLatestFrom(stateEmitter$)).subscribe(([abundance, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].abundance = abundance;
         }));
       });
-      const muchSubscription = this.#router.view.much$.pipe(combineLatestWith(stateEmitter$)).subscribe(([abundance, state]) => {
+      const muchSubscription = this.#router.view.much$.pipe(withLatestFrom(stateEmitter$)).subscribe(([abundance, state]) => {
         store.save(APP_STATE_KEY, produce(state, (draft) => {
           draft.itemMap[id][index].abundance = abundance;
         }));
