@@ -50,20 +50,8 @@ export class GoogleDriveSyncOauthClient {
     console.debug('google api client initialized');
 
     // get access token with refresh token
-    if (this.config.useOffline) {
-      if (this.config.saveRefreshToken) {
-        console.debug('try to get access token');
-        const storedRefreshToken = localStorage.getItem(GOAUTH_REFRESH_TOKEN_KEY);
-        if (storedRefreshToken) {
-          console.debug('refresh token exists');
-          console.debug('request access token');
-          const token = await refreshToken({ refreshToken: storedRefreshToken });
-
-          this.#handleLogin(token);
-        } else {
-          console.debug('refresh token doesn\'t exist');
-        }
-      }
+    if (this.config.useOffline && this.config.saveRefreshToken) {
+      await this.#refreshToken();
     }
 
     if (!this.config.useOffline) {
@@ -82,6 +70,20 @@ export class GoogleDriveSyncOauthClient {
     this.#_google_ready = true;
   }
 
+  async #refreshToken() {
+    console.debug('try to get access token');
+    const storedRefreshToken = localStorage.getItem(GOAUTH_REFRESH_TOKEN_KEY);
+    if (storedRefreshToken) {
+      console.debug('refresh token exists');
+      console.debug('request access token');
+      const token = await refreshToken({ refreshToken: storedRefreshToken });
+
+      this.#handleLogin(token);
+    } else {
+      console.debug('refresh token doesn\'t exist');
+    }
+  }
+
   #handleLogin(token) {
     token.expires_at = +Date.now() + token.expires_in * 1000;
     gapi.client.setToken(token);
@@ -92,9 +94,17 @@ export class GoogleDriveSyncOauthClient {
     if (this.#_timeout) {
       clearTimeout(this.#_timeout);
     }
-    this.#_timeout = setTimeout(() => {
-      window.dispatchEvent(new Event('TokenExpired'));
-    }, token.expires_in * 1000);
+    this.#_timeout = setTimeout(async () => {
+      if (this.config.useOffline && this.config.saveRefreshToken) {
+        try {
+          await this.#refreshToken();
+        } catch (error) {
+          window.dispatchEvent(new Event('TokenExpired'));
+        }
+      } else {
+        window.dispatchEvent(new Event('TokenExpired'));
+      }
+    }, (token.expires_in - 300) * 1000);
 
     this.#_user_drive_ready = true;
   }
