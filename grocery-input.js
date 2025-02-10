@@ -1,7 +1,7 @@
 const { el, router } = redom;
 const { fromEvent, merge, map, tap } = rxjs;
 
-export class ItemInput {
+export class GroceryInput {
   #form;
 
   #name;
