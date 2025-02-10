@@ -3,7 +3,7 @@ const { el, place, list } = redom;
 const { fromEvent, withLatestFrom, tap } = rxjs;
 import { store, stateEmitter$, APP_STATE_KEY } from './state.js';
 import { Template } from './item-template.js';
-import { ItemInput } from './item-input.js';
+import { TemplateInput } from './template-input.js';
 
 export class ListTemplate {
   #toggleButton;
@@ -19,7 +19,7 @@ export class ListTemplate {
         this.#toggleButton = el('button.btn', '템플릿 추가'),
       ),
       this.#templateInputPlace = place(el('div',
-        this.#templateInput = new ItemInput(),
+        this.#templateInput = new TemplateInput(),
         this.#addButton = el('button.btn', '추가'),
       )),
       el('section.my-2',

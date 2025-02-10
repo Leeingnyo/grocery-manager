@@ -53,7 +53,7 @@ class AbundanceInput {
 export class Template {
   #name;
   #router;
-  #subscriptions;
+  #comment;
 
   constructor() {
     this.el = el('article.min-h-9.pt-2.pb-1',
@@ -65,6 +65,7 @@ export class Template {
           '대충': AbundanceInput,
         }),
       ),
+      this.#comment = el('span'),
     );
   }
 
@@ -77,8 +78,8 @@ export class Template {
       step = 1,
       amount,
       abundance,
-      productionDate,
-      expirationDate,
+      expirationDays,
+      comment,
     },
     index,
     items,
@@ -93,6 +94,7 @@ export class Template {
     } else if (kind === '대충') {
       this.#router.view.setAbundance(true);
     }
+    this.#comment.textContent = comment;
   }
 }
 
