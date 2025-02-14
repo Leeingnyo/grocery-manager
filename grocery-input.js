@@ -145,7 +145,7 @@ export class GroceryInput {
   }
 
   get value() {
-    const { kind, number = 0, step = 1, unit, amount = 100, abundance = true, ...rest } = this.#formData();
+    const { kind, number = 0, step = 1, unit, amount = 100, abundance, ...rest } = this.#formData();
     if (kind === '수량') {
       return {
         kind, number: +number, step: +step, unit,
@@ -160,7 +160,7 @@ export class GroceryInput {
     }
     if (kind === '대충') {
       return {
-        kind, abundance: abundance === 'on',
+        kind, abundance: abundance === 'true',
         ...rest,
       };
     }

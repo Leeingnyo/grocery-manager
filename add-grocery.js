@@ -1,4 +1,5 @@
 const { el } = redom;
+import { GroceryInput } from './grocery-input.js';
 
 export class AddGrocery {
   constructor() {
