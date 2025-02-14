@@ -1,5 +1,5 @@
 const { el, place } = redom;
-const { fromEvent, switchMap, map, throttleTime, debounceTime } = rxjs;
+const { fromEvent, switchMap, map, throttleTime, debounceTime, Subject } = rxjs;
 import { getUserInfo } from './google-drive-sync/google-api.js';
 
 import { app } from './app.js';
@@ -15,6 +15,7 @@ class Layout {
   #app;
 
   #syncSubscripiton;
+  #syncDataSubscription;
   #logoutSubscription;
   #loadInterval;
   #saveSubscription;
@@ -74,19 +75,28 @@ class Layout {
   }
 
   onmount() {
+    const syncData$ = new Subject();
+
     this.#syncSubscripiton = fromEvent(window, 'SyncReady').subscribe((e) => {
-      const loadSyncedData = async () => {
-        const previous = this.#syncButton.textContent;
-        this.#syncButton.textContent = 'Syncing...';
-        const remoteState = await store.loadRemote(APP_STATE_KEY);
-        this.#syncButton.textContent = previous;
-        stateEmitter$.next(remoteState);
+      const loadSyncedData = () => {
+        syncData$.next();
       };
       this.#loadInterval = setInterval(() => {
+        console.debug('interval called', Date.now());
         loadSyncedData();
       }, 5 * 60 * 1000);
       loadSyncedData();
     });
+
+    this.#syncDataSubscription = syncData$.pipe(debounceTime(100)).subscribe(async () => {
+      console.debug('sync data');
+      const previous = this.#syncButton.textContent;
+      this.#syncButton.textContent = 'Syncing...';
+      const remoteState = await store.loadRemote(APP_STATE_KEY);
+      this.#syncButton.textContent = previous;
+      stateEmitter$.next(remoteState);
+    });
+
     this.#logoutSubscription = fromEvent(window, 'UserLogout').subscribe((e) => {
       clearInterval(this.#loadInterval);
     });
@@ -102,6 +112,7 @@ class Layout {
 
   onunmount() {
     this.#syncSubscripiton.unsubscribe();
+    this.#syncDataSubscription.unsubscribe();
     clearInterval(this.#loadInterval);
     this.#logoutSubscription.unsubscribe();
     this.#saveSubscription.unsubscribe();
