@@ -7,6 +7,28 @@ const largeSections = [
   { id: 2, name: '실온' },
 ];
 
+/**
+// item
+{
+  id: string;
+  name: string;
+  kind: '수량' | '퍼센트' | '대충';
+  comment?: string;
+}
+{ kind: '수량'; number: number; step: number; unit: string }
+{ kind: '퍼센트'; amount: number }
+{ kind: '대충'; abundance: boolean }
+{
+  expirationDate: string; // ISO-8601 yyyy-MM-dd
+  productionDate: string; // ISO-8601 yyyy-MM-dd
+}
+
+// template
+{
+  expirationDays: number;
+}
+ */
+
 const INITIAL_STATE = {
   largeSections,
   itemMap: {},
