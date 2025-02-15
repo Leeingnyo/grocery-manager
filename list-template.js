@@ -13,7 +13,7 @@ export class ListTemplate {
   #list;
 
   constructor() {
-    this.el = el('section.add-grocery',
+    this.el = el('section.list-template',
       el('nav.flex.flex-wrap.items-center.gap-2',
         el('a', { href: '/grocery' }, el('button.btn', '물품 목록')),
         this.#toggleButton = el('button.btn', '템플릿 추가'),

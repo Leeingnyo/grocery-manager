@@ -4,9 +4,7 @@ import { layout } from './layout.js';
 import { app } from './app.js';
 
 page('/grocery', () => app.update('list-grocery'));
-page('/add-grocery', () => app.update('add-grocery'));
 page('/list-template', () => app.update('list-template'));
-page('/add-item', () => app.update('add-item'));
 page('/shopping-list', () => app.update('shopping-list'));
 
 page('*', () => app.update('not-found'));
