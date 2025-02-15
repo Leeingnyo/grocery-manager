@@ -118,6 +118,39 @@ export class GroceryInput {
     this.#kindRouter.update('수량');
   }
 
+  update(grocery) {
+    const {
+      name,
+      kind,
+      number,
+      step,
+      unit,
+      amount,
+      abundance,
+      comment,
+      expirationDate,
+      productionDate,
+    } = grocery;
+
+    this.#name.value = name;
+    if (kind === '수량') {
+      this.#kind_수량.checked = true;
+    } else if (kind === '퍼센트') {
+      this.#kind_퍼센트.checked = true;
+    } else if (kind === '대충') {
+      this.#kind_대충.checked = true;
+    }
+    this.#kindRouter.update(kind);
+    this.#number.value = number;
+    this.#step.value = step;
+    this.#unit.value = unit;
+    this.#amount.value = amount;
+    this.#abundance.checked = abundance;
+    this.#comment.value = comment ?? '';
+    this.#expirationDate.value = expirationDate;
+    this.#productionDate.value = productionDate;
+  }
+
   reset() {
     this.#name.value = '';
 
