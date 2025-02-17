@@ -133,7 +133,7 @@ export class Item {
         el('.flex-grow'),
         this.#showEditFormButton = el('button', 'Edit'),
       ),
-      this.#editInputPlace = place(el('.m-1.p-1.border.rounded',
+      this.#editInputPlace = place(el('.mt-2.mb-1.p-2.border.rounded',
         this.#editInput = new GroceryInput(),
         this.#editButton = el('button', 'save'),
       )),
