@@ -66,12 +66,15 @@ export class ListGrocery {
         .pipe(tap(console.log))
         .subscribe(([, state]) => {
           if (!this.#groceryInput.valid) return;
-          const section = this.#sectionSelect.value;
+          const section = Number.parseInt(this.#sectionSelect.value);
           const grocery = this.#groceryInput.value;
 
-          console.log(section, grocery);
+          console.debug('[GROCERY] Adding item: ', section, grocery);
           store.save(APP_STATE_KEY, produce(state, (draft) => {
-            if (!draft.itemMap[section]) return;
+            if (!draft.largeSections.map(({ id }) => id).includes(section)) return;
+            if (!draft.itemMap[section]) {
+              draft.itemMap[section] = [];
+            }
 
             draft.itemMap[section].push(grocery);
           }));
