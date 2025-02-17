@@ -2,6 +2,7 @@ const { produce } = immer;
 const { el, router, place } = redom;
 const { fromEvent, map, withLatestFrom } = rxjs;
 import { store, stateEmitter$, APP_STATE_KEY } from './state.js';
+import { GroceryInput } from './grocery-input.js';
 
 class NumberInput {
   #minus;
@@ -21,10 +22,6 @@ class NumberInput {
 
     this.minus$ = fromEvent(this.#minus, 'click').pipe(map((e) => -1));
     this.number$ = fromEvent(this.#number, 'input').pipe(map((e) => {
-      console.log(
-        e.currentTarget.value, (+e.currentTarget.value).toString(),
-        e.currentTarget.value === (+e.currentTarget.value).toString()
-      );
       return (
         e.currentTarget.value === (+e.currentTarget.value).toString() ?
           e.currentTarget.value : undefined
@@ -116,6 +113,11 @@ export class Item {
   #router;
   #subscriptions;
 
+  #showEditFormButton;
+  #editInputPlace;
+  #editInput;
+  #editButton;
+
   constructor() {
     this.el = el('article.min-h-9.pt-2.pb-1',
       el('.flex.gap-1.items-center',
@@ -128,7 +130,13 @@ export class Item {
       ),
       el('.flex.gap-1.items-center.text-sm',
         this.#time = new Time(),
+        el('.flex-grow'),
+        this.#showEditFormButton = el('button', 'Edit'),
       ),
+      this.#editInputPlace = place(el('.m-1.p-1.border.rounded',
+        this.#editInput = new GroceryInput(),
+        this.#editButton = el('button', 'save'),
+      )),
     );
   }
 
@@ -197,6 +205,25 @@ export class Item {
       });
       this.#subscriptions = [lessSubscription, muchSubscription];
     }
+
+    this.#subscriptions.push(
+      fromEvent(this.#showEditFormButton, 'click')
+          .pipe(withLatestFrom(stateEmitter$))
+          .subscribe(([, state]) => {
+            this.#editInputPlace.update(!this.#editInputPlace.visible);
+            this.#editInput.update(state.itemMap[id][index]);
+          })
+    );
+    this.#subscriptions.push(
+      fromEvent(this.#editButton, 'click')
+          .pipe(withLatestFrom(stateEmitter$))
+          .subscribe(([, state]) => {
+            store.save(APP_STATE_KEY, produce(state, (draft) => {
+              if (!this.#editInput.valid) return;
+              draft.itemMap[id][index] = this.#editInput.value;
+            }));
+          })
+    );
   }
 }
 
